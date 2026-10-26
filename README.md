@@ -105,11 +105,11 @@ erDiagram
 1. Importar el script [`sql/motorfix.sql`](sql/motorfix.sql) en el contenedor MySQL/MariaDB (`db:3306`).
 2. Verificar las credenciales en [`backend/.env`](backend/.env):
    ```ini
-   DB_HOST=db
-   DB_NAME=motorfix
-   DB_USER=root
-   DB_PASS=Manolo_69
-   DB_PORT=3306
+   DB_HOST=
+   DB_NAME=
+   DB_USER=
+   DB_PASS=
+   DB_PORT=
    ```
 3. Usuarios de prueba incluidos en el seed (contraseña para todos: `password`):
    * **Admin:** `admin@motorfix.es`
