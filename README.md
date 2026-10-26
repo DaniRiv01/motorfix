@@ -82,6 +82,9 @@ erDiagram
 
 ## 2. Backlog del Proyecto (Jira / Trello / GitHub Projects)
 
+* **Tablero de Trello:** [MotorFix en Trello](https://trello.com/invite/b/6adf9eebe545bdd6b6330c01/ATTIaa1dc2f3f92e2a5164e37ecb5828267f43DDD262/motorfix) ([`res/trello.txt`](res/trello.txt))
+* **Diagrama de Clases UML:** [`res/Usuario Cliente Authentication Model-2026-10-26-181112.png`](res/Usuario%20Cliente%20Authentication%20Model-2026-10-26-181112.png)
+
 | Código | Semana / Sprint | Épica | Tarea / Historia de Usuario | Estado |
 | :--- | :--- | :--- | :--- | :--- |
 | **MF-01** | Semana 1 (19-25 Oct) | Infraestructura | Configurar repositorio Git (`motorfix`) y estructura MVC desacoplada | Completado |
