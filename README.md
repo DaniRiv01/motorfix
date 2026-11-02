@@ -90,8 +90,8 @@ erDiagram
 | **MF-01** | Semana 1 (19-25 Oct) | Infraestructura | Configurar repositorio Git (`motorfix`) y estructura MVC desacoplada | Completado |
 | **MF-02** | Semana 1 (19-25 Oct) | Base de Datos | Diseñar modelo E-R y script `sql/motorfix.sql` con datos semilla | Completado |
 | **MF-03** | Semana 1 (19-25 Oct) | Backend (AD) | Implementar clase `Conexion.php` con patrón PDO Singleton y lectura de `.env` | Completado |
-| **MF-04** | Semana 2 (26 Oct-01 Nov) | Backend (AD) | Implementar modelos POO `Usuario.php` (con BCrypt y `auth_key`), `Cliente.php` y `Vehiculo.php` | Pendiente |
-| **MF-05** | Semana 2 (26 Oct-01 Nov) | Frontend (DI) | Maquetar vistas HTML5/CSS3 responsivas (`index.html`, `cliente.html`) | Pendiente |
+| **MF-04** | Semana 2 (26 Oct-01 Nov) | Backend (AD) | Implementar modelos POO `Usuario.php` (con BCrypt y `auth_key`), `Cliente.php` y `Vehiculo.php` | Completado |
+| **MF-05** | Semana 2 (26 Oct-01 Nov) | Frontend (DI) | Maquetar vistas HTML5/CSS3 responsivas (`index.html`, `cliente.html`) | Completado |
 | **MF-06** | Semana 3 (02-08 Nov) | Backend (AD) | Implementar modelos POO `Cita.php` y `Factura.php` | Pendiente |
 | **MF-07** | Semana 3 (02-08 Nov) | Servicios Web | Desarrollar `auth_sw.php` y conectar Login/Registro con `fetch()` y `auth_key` | Pendiente |
 | **MF-08** | Semana 4 (09-15 Nov) | Cliente (DI/AD) | Desarrollar `cliente_sw.php`, `vehiculo_sw.php`, `cita_sw.php` y panel `cliente.js` | Pendiente |

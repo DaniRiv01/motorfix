@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MotorFix - Panel de Cliente</title>
+    <link rel="icon" type="image/svg+xml" href="../res/public/car.svg">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="cliente-body">
+    <main class="cliente-layout">
+        <div class="cliente-header">
+            <div class="auth-brand">
+                <img src="../res/public/car.svg" alt="MotorFix Icono" class="brand-logo">
+                <span class="brand-title">MotorFix</span>
+            </div>
+            <div class="topbar-info">
+                <span id="nombreUsuarioActivo">Cliente</span>
+                <button type="button" id="btnLogout" class="btn btn-secondary btn-sm">Cerrar Sesión</button>
+            </div>
+        </div>
+
+        <div id="clienteSlot" class="cliente-slot">
+            <div class="auth-wrapper cliente-wrapper">
+                <div id="mensajeAlerta" class="alert"></div>
+
+                <div class="tabs tabs-4" id="tabsCliente">
+                    <button type="button" class="tab-btn active" data-index="0">Mis Vehículos</button>
+                    <button type="button" class="tab-btn" data-index="1">Solicitar Cita</button>
+                    <button type="button" class="tab-btn" data-index="2">Mis Citas</button>
+                    <button type="button" class="tab-btn" data-index="3">Mis Facturas</button>
+                </div>
+
+                <div class="auth-slider" id="clienteSlider">
+                    <div id="clienteTrack" class="cliente-track">
+                        <section class="card cliente-seccion">
+                            <h2>Mis Vehículos</h2>
+                            <form id="formVehiculo">
+                                <input type="hidden" id="idVehiculo" name="id_vehiculo">
+                                <div class="form-grid">
+                                    <div class="form-group">
+                                        <label for="matricula">Matrícula</label>
+                                        <input type="text" id="matricula" name="matricula" required placeholder="1234ABC">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="marca">Marca</label>
+                                        <input type="text" id="marca" name="marca" required placeholder="Seat">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="modelo">Modelo</label>
+                                        <input type="text" id="modelo" name="modelo" required placeholder="León">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="anio">Año</label>
+                                        <div class="year-control" id="yearControl">
+                                            <input type="text" id="anio" name="anio" required maxlength="4" pattern="\d{4}" inputmode="numeric" placeholder="2026" readonly>
+                                            <input type="date" id="anioDatePicker" class="hidden-date-picker" min="1886-01-01" max="2026-12-31" tabindex="-1">
+                                            <button type="button" id="btnAbrirCalendarioAnio" class="control-step-btn" aria-label="Seleccionar año">
+                                                <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                                            </button>
+                                            <div id="yearDropdown" class="year-dropdown">
+                                                <div id="yearList" class="year-list"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="kilometraje">Kilometraje</label>
+                                        <div class="km-control">
+                                            <button type="button" id="btnKmBajar" class="control-step-btn" aria-label="Bajar kilometraje">
+                                                <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                                            </button>
+                                            <input type="number" id="kilometraje" name="kilometraje" required min="0" step="1000" value="0">
+                                            <button type="button" id="btnKmSubir" class="control-step-btn" aria-label="Subir kilometraje">
+                                                <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="actions-row">
+                                    <button type="submit" id="btnGuardarVehiculo" class="btn">Guardar Vehículo</button>
+                                    <button type="button" id="btnCancelarVehiculo" class="btn btn-secondary hidden">Cancelar</button>
+                                </div>
+                            </form>
+
+                            <div class="table-wrapper" style="margin-top: 20px;">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>Matrícula</th>
+                                            <th>Marca</th>
+                                            <th>Modelo</th>
+                                            <th>Año</th>
+                                            <th>Kilometraje</th>
+                                            <th>Acciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tablaVehiculos"></tbody>
+                                </table>
+                                <div id="emptyVehiculos" class="table-empty">Sin vehículos cargados.</div>
+                            </div>
+                        </section>
+
+                        <section class="card cliente-seccion">
+                            <h2>Solicitar Cita Previa</h2>
+                            <form id="formCita">
+                                <div class="form-grid">
+                                    <div class="form-group">
+                                        <label for="citaVehiculo">Vehículo</label>
+                                        <select id="citaVehiculo" name="id_vehiculo" required>
+                                            <option value="">Seleccione un vehículo</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="fechaCitaDisplay">Fecha y Hora Deseada</label>
+                                        <div class="datetime-control" id="datetimeControl">
+                                            <input type="text" id="fechaCitaDisplay" placeholder="Seleccione fecha y hora" readonly required>
+                                            <input type="hidden" id="fechaCita" name="fecha_cita" required>
+                                            <button type="button" id="btnAbrirCalendarioCita" class="control-step-btn" aria-label="Seleccionar fecha y hora">
+                                                <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                                            </button>
+                                            <div id="datetimeDropdown" class="datetime-dropdown">
+                                                <div class="calendar-header">
+                                                    <button type="button" id="calPrevMes" class="control-step-btn" aria-label="Mes anterior">
+                                                        <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                                                    </button>
+                                                    <span id="calTituloMes" class="calendar-title"></span>
+                                                    <button type="button" id="calNextMes" class="control-step-btn" aria-label="Mes siguiente">
+                                                        <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                                                    </button>
+                                                </div>
+                                                <div class="calendar-weekdays">
+                                                    <span>L</span><span>M</span><span>X</span><span>J</span><span>V</span><span>S</span><span>D</span>
+                                                </div>
+                                                <div id="calDiasGrid" class="calendar-days"></div>
+                                                <div class="calendar-time-row">
+                                                    <span class="calendar-time-label">Hora:</span>
+                                                    <div id="calHorasList" class="calendar-hours-list"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="motivoCita">Motivo / Avería</label>
+                                    <textarea id="motivoCita" name="motivo" rows="2" required placeholder="Describa brevemente la revisión o avería"></textarea>
+                                </div>
+                                <div class="actions-row">
+                                    <button type="submit" class="btn">Solicitar Cita</button>
+                                </div>
+                            </form>
+                        </section>
+
+                        <section class="card cliente-seccion">
+                            <h2>Estado de Mis Citas y Reparaciones</h2>
+                            <div class="table-wrapper">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Vehículo</th>
+                                            <th>Fecha Cita</th>
+                                            <th>Motivo</th>
+                                            <th>Estado</th>
+                                            <th>Horas</th>
+                                            <th>Materiales</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tablaCitas"></tbody>
+                                </table>
+                                <div id="emptyCitas" class="table-empty">Sin citas registradas.</div>
+                            </div>
+                        </section>
+
+                        <section class="card cliente-seccion">
+                            <h2>Mis Facturas</h2>
+                            <div class="table-wrapper">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>Nº Factura</th>
+                                            <th>Fecha Emisión</th>
+                                            <th>Mano de Obra</th>
+                                            <th>Repuestos</th>
+                                            <th>Subtotal</th>
+                                            <th>IVA (21%)</th>
+                                            <th>Total</th>
+                                            <th>Estado</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tablaFacturas"></tbody>
+                                </table>
+                                <div id="emptyFacturas" class="table-empty">Sin facturas disponibles.</div>
+                            </div>
+                        </section>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="js/main.js"></script>
+    <script src="js/cliente.js"></script>
+</body>
+</html>

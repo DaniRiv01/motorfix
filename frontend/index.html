@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MotorFix - Acceso</title>
+    <link rel="icon" type="image/svg+xml" href="../res/public/car.svg">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="auth-body">
+    <main class="auth-layout">
+        <div class="auth-brand">
+            <img src="../res/public/car.svg" alt="MotorFix Icono" class="brand-logo">
+            <span class="brand-title">MotorFix</span>
+        </div>
+
+        <div id="authSlot" class="auth-slot">
+            <div class="auth-wrapper">
+                <div id="mensajeAlerta" class="alert"></div>
+
+            <div class="tabs">
+                <button type="button" id="tabLogin" class="tab-btn active">Iniciar Sesión</button>
+                <button type="button" id="tabRegistro" class="tab-btn">Registro de Cliente</button>
+            </div>
+
+            <div class="auth-slider">
+                <div id="authTrack" class="auth-track">
+                    <section id="seccionLogin" class="card">
+                        <h2>Acceso a la plataforma</h2>
+                        <form id="formLogin">
+                            <div class="form-group">
+                                <label for="loginEmail">Correo electrónico</label>
+                                <input type="email" id="loginEmail" name="email" required placeholder="usuario@motorfix.es">
+                            </div>
+                            <div class="form-group">
+                                <label for="loginPassword">Contraseña</label>
+                                <input type="password" id="loginPassword" name="password" required placeholder="••••••••">
+                            </div>
+                            <div class="actions-row">
+                                <button type="submit" class="btn">Entrar</button>
+                            </div>
+                        </form>
+                    </section>
+
+                    <section id="seccionRegistro" class="card">
+                        <h2>Alta de nuevo cliente</h2>
+                        <form id="formRegistro">
+                            <div class="form-group">
+                                <label for="regUsername">Nombre de usuario</label>
+                                <input type="text" id="regUsername" name="username" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="regEmail">Correo electrónico</label>
+                                <input type="email" id="regEmail" name="email" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="regPassword">Contraseña</label>
+                                <input type="password" id="regPassword" name="password" required>
+                            </div>
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label for="regDni">DNI</label>
+                                    <input type="text" id="regDni" name="dni" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="regTelefono">Teléfono</label>
+                                    <input type="text" id="regTelefono" name="telefono" required>
+                                </div>
+                            </div>
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label for="regNombre">Nombre</label>
+                                    <input type="text" id="regNombre" name="nombre" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="regApellidos">Apellidos</label>
+                                    <input type="text" id="regApellidos" name="apellidos" required>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="regDireccion">Dirección</label>
+                                <input type="text" id="regDireccion" name="direccion">
+                            </div>
+                            <div class="actions-row">
+                                <button type="submit" class="btn">Registrarse</button>
+                            </div>
+                        </form>
+                    </section>
+                </div>
+            </div>
+            <div id="barraTirador" class="shutter-handle">
+                <span class="shutter-grip"></span>
+            </div>
+        </div>
+        </div>
+    </main>
+
+    <script src="js/main.js"></script>
+    <script src="js/auth.js"></script>
+</body>
+</html>
