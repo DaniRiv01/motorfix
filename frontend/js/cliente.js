@@ -11,6 +11,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const formCita = document.getElementById('formCita');
     const btnCancelarVehiculo = document.getElementById('btnCancelarVehiculo');
     const btnLogout = document.getElementById('btnLogout');
+    const userMenu = document.getElementById('userMenu');
+    const btnUserMenu = document.getElementById('btnUserMenu');
+    const btnAbrirConfigUsuario = document.getElementById('btnAbrirConfigUsuario');
+    const modalConfigUsuario = document.getElementById('modalConfigUsuario');
+    const btnCerrarModalConfig = document.getElementById('btnCerrarModalConfig');
+    const btnCancelarModalConfig = document.getElementById('btnCancelarModalConfig');
+    const formConfigUsuario = document.getElementById('formConfigUsuario');
+    const nombreUsuarioActivo = document.getElementById('nombreUsuarioActivo');
 
     const inputKilometraje = document.getElementById('kilometraje');
     const btnKmBajar = document.getElementById('btnKmBajar');
@@ -603,12 +611,189 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    function cerrarMenuUsuario() {
+        if (!userMenu || !btnUserMenu) return;
+        userMenu.classList.remove('open');
+        btnUserMenu.setAttribute('aria-expanded', 'false');
+    }
+
+    function alternarMenuUsuario() {
+        if (!userMenu || !btnUserMenu) return;
+        const abriendo = !userMenu.classList.contains('open');
+        userMenu.classList.toggle('open', abriendo);
+        btnUserMenu.setAttribute('aria-expanded', abriendo ? 'true' : 'false');
+    }
+
+    function abrirModalConfig() {
+        if (!modalConfigUsuario) return;
+        cerrarMenuUsuario();
+        modalConfigUsuario.classList.add('open');
+        modalConfigUsuario.setAttribute('aria-hidden', 'false');
+    }
+
+    function cerrarModalConfig() {
+        if (!modalConfigUsuario) return;
+        modalConfigUsuario.classList.remove('open');
+        modalConfigUsuario.setAttribute('aria-hidden', 'true');
+    }
+
+    if (btnUserMenu) {
+        btnUserMenu.addEventListener('click', (e) => {
+            e.stopPropagation();
+            alternarMenuUsuario();
+        });
+    }
+
+    if (btnAbrirConfigUsuario) {
+        btnAbrirConfigUsuario.addEventListener('click', () => {
+            abrirModalConfig();
+        });
+    }
+
+    if (btnCerrarModalConfig) {
+        btnCerrarModalConfig.addEventListener('click', () => {
+            cerrarModalConfig();
+        });
+    }
+
+    if (btnCancelarModalConfig) {
+        btnCancelarModalConfig.addEventListener('click', () => {
+            cerrarModalConfig();
+        });
+    }
+
+    if (modalConfigUsuario) {
+        modalConfigUsuario.addEventListener('mousedown', (e) => {
+            if (e.target === modalConfigUsuario) {
+                cerrarModalConfig();
+            }
+        });
+    }
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            cerrarMenuUsuario();
+            cerrarModalConfig();
+        }
+    });
+
+    const AUTH_ENDPOINT = '../backend/controller/auth_sw.php';
+
+    function rellenarDatosUsuarioUI(usuario, cliente) {
+        if (nombreUsuarioActivo) {
+            if (cliente && (cliente.nombre || cliente.apellidos)) {
+                nombreUsuarioActivo.textContent = `${cliente.nombre || ''} ${cliente.apellidos || ''}`.trim();
+            } else if (usuario && usuario.username) {
+                nombreUsuarioActivo.textContent = usuario.username;
+            }
+        }
+
+        const cfgUsername = document.getElementById('cfgUsername');
+        const cfgEmail = document.getElementById('cfgEmail');
+        const cfgNombre = document.getElementById('cfgNombre');
+        const cfgApellidos = document.getElementById('cfgApellidos');
+        const cfgDni = document.getElementById('cfgDni');
+        const cfgTelefono = document.getElementById('cfgTelefono');
+        const cfgDireccion = document.getElementById('cfgDireccion');
+        const cfgPassword = document.getElementById('cfgPassword');
+
+        if (usuario) {
+            if (cfgUsername) cfgUsername.value = usuario.username || '';
+            if (cfgEmail) cfgEmail.value = usuario.email || '';
+        }
+        if (cliente) {
+            if (cfgNombre) cfgNombre.value = cliente.nombre || '';
+            if (cfgApellidos) cfgApellidos.value = cliente.apellidos || '';
+            if (cfgDni) cfgDni.value = cliente.dni || '';
+            if (cfgTelefono) cfgTelefono.value = cliente.telefono || '';
+            if (cfgDireccion) cfgDireccion.value = cliente.direccion || '';
+        }
+        if (cfgPassword) {
+            cfgPassword.value = '';
+        }
+    }
+
+    async function verificarAccesoCliente() {
+        const token = obtenerToken();
+        if (!token) {
+            window.location.href = 'index.html';
+            return;
+        }
+
+        const usuarioLocal = obtenerUsuarioSesion();
+        const clienteLocal = obtenerClienteSesion();
+        if (usuarioLocal) {
+            rellenarDatosUsuarioUI(usuarioLocal, clienteLocal);
+        }
+
+        try {
+            const res = await peticionSW(AUTH_ENDPOINT, { action: 'validar_token' });
+            if (!res || !res.success || !res.data || !res.data.usuario) {
+                limpiarSesion();
+                window.location.href = 'index.html';
+                return;
+            }
+            actualizarDatosSesion(res.data);
+            rellenarDatosUsuarioUI(res.data.usuario, res.data.cliente);
+        } catch (err) {
+            limpiarSesion();
+            window.location.href = 'index.html';
+        }
+    }
+
+    window.addEventListener('motorfix:alerta', () => {
+        if (!animando && clienteSlider && secciones[indiceActual]) {
+            clienteSlider.style.height = calcularAlturaSeccion(secciones[indiceActual]) + 'px';
+            fijarAlturaSlot(secciones[indiceActual]);
+        }
+    });
+
+    verificarAccesoCliente();
+
+    if (formConfigUsuario) {
+        formConfigUsuario.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            ocultarAlerta();
+
+            const payload = {
+                action: 'actualizar_perfil',
+                username: document.getElementById('cfgUsername').value.trim(),
+                email: document.getElementById('cfgEmail').value.trim(),
+                nombre: document.getElementById('cfgNombre').value.trim(),
+                apellidos: document.getElementById('cfgApellidos').value.trim(),
+                dni: document.getElementById('cfgDni').value.trim(),
+                telefono: document.getElementById('cfgTelefono').value.trim(),
+                direccion: document.getElementById('cfgDireccion').value.trim(),
+                password: document.getElementById('cfgPassword').value
+            };
+
+            try {
+                const res = await peticionSW(AUTH_ENDPOINT, payload);
+                if (res && res.success && res.data && res.data.usuario) {
+                    actualizarDatosSesion(res.data);
+                    rellenarDatosUsuarioUI(res.data.usuario, res.data.cliente);
+                    cerrarModalConfig();
+                    mostrarAlerta(res.msg || 'Configuración de usuario guardada correctamente.', 'success');
+                } else {
+                    cerrarModalConfig();
+                    mostrarAlerta((res && res.msg) || 'No se pudo actualizar el perfil.', 'error');
+                }
+            } catch (err) {
+                cerrarModalConfig();
+                mostrarAlerta('Error de conexión al guardar la configuración.', 'error');
+            }
+        });
+    }
+
     document.addEventListener('mousedown', (e) => {
         if (yearControl && !yearControl.contains(e.target)) {
             cerrarSelectorAnio();
         }
         if (datetimeControl && !datetimeControl.contains(e.target)) {
             cerrarSelectorCita();
+        }
+        if (userMenu && !userMenu.contains(e.target)) {
+            cerrarMenuUsuario();
         }
     });
 
@@ -633,7 +818,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     if (btnLogout) {
-        btnLogout.addEventListener('click', () => {
+        btnLogout.addEventListener('click', async () => {
+            try {
+                await peticionSW(AUTH_ENDPOINT, { action: 'logout' });
+            } catch (err) {
+            }
+            limpiarSesion();
             window.location.href = 'index.html';
         });
     }

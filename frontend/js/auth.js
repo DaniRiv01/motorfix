@@ -182,15 +182,104 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    if (formLogin) {
-        formLogin.addEventListener('submit', (e) => {
+    const AUTH_ENDPOINT = '../backend/controller/auth_sw.php';
+
+    window.addEventListener('motorfix:alerta', () => {
+        if (!animando) {
+            const activa = getSeccionActiva();
+            if (activa) {
+                fijarAlturaSlot(activa);
+            }
+        }
+    });
+
+    async function comprobarSesionExistente() {
+        const token = obtenerToken();
+        if (!token) return;
+        try {
+            const res = await peticionSW(AUTH_ENDPOINT, { action: 'validar_token' });
+            if (res && res.success && res.data && res.data.usuario) {
+                actualizarDatosSesion(res.data);
+                window.location.href = obtenerRutaPorRol(res.data.usuario.rol);
+            } else {
+                limpiarSesion();
+            }
+        } catch (err) {
+            limpiarSesion();
+        }
+    }
+
+    comprobarSesionExistente();
+
+    document.querySelectorAll('.auth-link').forEach((enlace) => {
+        enlace.addEventListener('click', (e) => {
             e.preventDefault();
+        });
+    });
+
+    if (formLogin) {
+        formLogin.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            ocultarAlerta();
+
+            const email = document.getElementById('loginEmail').value.trim();
+            const password = document.getElementById('loginPassword').value;
+            const checkRecordar = document.getElementById('loginRecordar');
+            const recordar = checkRecordar ? checkRecordar.checked : false;
+
+            try {
+                const res = await peticionSW(AUTH_ENDPOINT, {
+                    action: 'login',
+                    email,
+                    password
+                });
+
+                if (res && res.success && res.data && res.data.usuario) {
+                    guardarSesion(res.data, recordar);
+                    mostrarAlerta(res.msg || 'Inicio de sesión correcto.', 'success');
+                    setTimeout(() => {
+                        window.location.href = obtenerRutaPorRol(res.data.usuario.rol);
+                    }, 350);
+                } else {
+                    mostrarAlerta((res && res.msg) || 'Credenciales incorrectas.', 'error');
+                }
+            } catch (err) {
+                mostrarAlerta('Error de conexión con el servidor.', 'error');
+            }
         });
     }
 
     if (formRegistro) {
-        formRegistro.addEventListener('submit', (e) => {
+        formRegistro.addEventListener('submit', async (e) => {
             e.preventDefault();
+            ocultarAlerta();
+
+            const payload = {
+                action: 'register',
+                username: document.getElementById('regUsername').value.trim(),
+                email: document.getElementById('regEmail').value.trim(),
+                password: document.getElementById('regPassword').value,
+                dni: document.getElementById('regDni').value.trim(),
+                telefono: document.getElementById('regTelefono').value.trim(),
+                nombre: document.getElementById('regNombre').value.trim(),
+                apellidos: document.getElementById('regApellidos').value.trim(),
+                direccion: document.getElementById('regDireccion').value.trim()
+            };
+
+            try {
+                const res = await peticionSW(AUTH_ENDPOINT, payload);
+                if (res && res.success && res.data && res.data.usuario) {
+                    guardarSesion(res.data, false);
+                    mostrarAlerta(res.msg || 'Registro completado con éxito.', 'success');
+                    setTimeout(() => {
+                        window.location.href = obtenerRutaPorRol(res.data.usuario.rol);
+                    }, 400);
+                } else {
+                    mostrarAlerta((res && res.msg) || 'No se pudo completar el registro.', 'error');
+                }
+            } catch (err) {
+                mostrarAlerta('Error de conexión con el servidor.', 'error');
+            }
         });
     }
 });

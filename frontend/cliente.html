@@ -8,17 +8,46 @@
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body class="cliente-body">
-    <main class="cliente-layout">
-        <div class="cliente-header">
-            <div class="auth-brand">
-                <img src="../res/public/car.svg" alt="MotorFix Icono" class="brand-logo">
-                <span class="brand-title">MotorFix</span>
-            </div>
-            <div class="topbar-info">
-                <span id="nombreUsuarioActivo">Cliente</span>
-                <button type="button" id="btnLogout" class="btn btn-secondary btn-sm">Cerrar Sesión</button>
+    <header class="cliente-header">
+        <a href="landing.html" class="auth-brand landing-brand-link">
+            <img src="../res/public/car.svg" alt="MotorFix Icono" class="brand-logo">
+            <span class="brand-title">MotorFix</span>
+        </a>
+        <div class="user-menu" id="userMenu">
+            <button type="button" id="btnUserMenu" class="user-avatar-btn" aria-label="Menú de usuario" aria-expanded="false">
+                <svg viewBox="0 0 24 24">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="12" cy="7" r="4"></circle>
+                </svg>
+            </button>
+            <div id="userDropdown" class="user-dropdown">
+                <div class="user-dropdown-header">
+                    <span id="nombreUsuarioActivo" class="user-dropdown-name">Cliente</span>
+                    <span class="user-dropdown-role">Panel de Cliente</span>
+                </div>
+                <div class="user-dropdown-list">
+                    <button type="button" id="btnAbrirConfigUsuario" class="user-dropdown-item">
+                        <svg viewBox="0 0 24 24">
+                            <circle cx="12" cy="12" r="3"></circle>
+                            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                        </svg>
+                        <span>Configuración de usuario</span>
+                    </button>
+                    <div class="user-dropdown-divider"></div>
+                    <button type="button" id="btnLogout" class="user-dropdown-item user-dropdown-danger">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                            <polyline points="16 17 21 12 16 7"></polyline>
+                            <line x1="21" y1="12" x2="9" y2="12"></line>
+                        </svg>
+                        <span>Cerrar Sesión</span>
+                    </button>
+                </div>
             </div>
         </div>
+    </header>
+
+    <main class="cliente-layout">
 
         <div id="clienteSlot" class="cliente-slot">
             <div class="auth-wrapper cliente-wrapper">
@@ -197,6 +226,64 @@
             </div>
         </div>
     </main>
+
+    <div id="modalConfigUsuario" class="modal-overlay" aria-hidden="true">
+        <div class="auth-wrapper modal-glass" role="dialog" aria-modal="true" aria-labelledby="tituloModalConfig">
+            <div class="modal-header">
+                <h2 id="tituloModalConfig">Configuración de Usuario</h2>
+                <button type="button" id="btnCerrarModalConfig" class="control-step-btn" aria-label="Cerrar configuración">
+                    <svg viewBox="0 0 24 24">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+            <form id="formConfigUsuario">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="cfgUsername">Nombre de usuario</label>
+                        <input type="text" id="cfgUsername" name="username" required placeholder="usuario_cliente">
+                    </div>
+                    <div class="form-group">
+                        <label for="cfgEmail">Correo electrónico</label>
+                        <input type="email" id="cfgEmail" name="email" required placeholder="cliente@motorfix.es">
+                    </div>
+                </div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="cfgNombre">Nombre</label>
+                        <input type="text" id="cfgNombre" name="nombre" required placeholder="Nombre">
+                    </div>
+                    <div class="form-group">
+                        <label for="cfgApellidos">Apellidos</label>
+                        <input type="text" id="cfgApellidos" name="apellidos" required placeholder="Apellidos">
+                    </div>
+                </div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="cfgDni">DNI</label>
+                        <input type="text" id="cfgDni" name="dni" required placeholder="12345678A">
+                    </div>
+                    <div class="form-group">
+                        <label for="cfgTelefono">Teléfono</label>
+                        <input type="text" id="cfgTelefono" name="telefono" required placeholder="600112233">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="cfgDireccion">Dirección</label>
+                    <input type="text" id="cfgDireccion" name="direccion" placeholder="Calle, número, localidad">
+                </div>
+                <div class="form-group">
+                    <label for="cfgPassword">Nueva contraseña (opcional)</label>
+                    <input type="password" id="cfgPassword" name="password" placeholder="Dejar en blanco para mantener la actual">
+                </div>
+                <div class="actions-row">
+                    <button type="submit" class="btn">Guardar Cambios</button>
+                    <button type="button" id="btnCancelarModalConfig" class="btn btn-secondary">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
     <script src="js/main.js"></script>
     <script src="js/cliente.js"></script>
