@@ -678,6 +678,315 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     const AUTH_ENDPOINT = '../backend/controller/auth_sw.php';
+    const VEHICULO_ENDPOINT = '../backend/controller/vehiculo_sw.php';
+    const CITA_ENDPOINT = '../backend/controller/cita_sw.php';
+
+    const tablaVehiculos = document.getElementById('tablaVehiculos');
+    const selectCitaVehiculo = document.getElementById('citaVehiculo');
+    const tablaCitas = document.getElementById('tablaCitas');
+    const tablaFacturas = document.getElementById('tablaFacturas');
+    const btnGuardarVehiculo = document.getElementById('btnGuardarVehiculo');
+
+    function recalcularAlturaActual() {
+        if (!animando && clienteSlider && secciones[indiceActual]) {
+            clienteSlider.style.height = calcularAlturaSeccion(secciones[indiceActual]) + 'px';
+            fijarAlturaSlot(secciones[indiceActual]);
+        }
+    }
+
+    function formatearFechaHora(fechaSql) {
+        if (!fechaSql) return '-';
+        const partes = String(fechaSql).split(' ');
+        const fechaPartes = (partes[0] || '').split('-');
+        if (fechaPartes.length !== 3) return fechaSql;
+        const hora = partes[1] ? partes[1].slice(0, 5) : '';
+        return `${fechaPartes[2]}/${fechaPartes[1]}/${fechaPartes[0]}${hora ? ' ' + hora : ''}`;
+    }
+
+    function formatearMoneda(valor) {
+        const num = Number(valor) || 0;
+        return num.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' €';
+    }
+
+    function prepararEdicionVehiculo(vehiculo) {
+        document.getElementById('idVehiculo').value = vehiculo.id_vehiculo;
+        document.getElementById('matricula').value = vehiculo.matricula || '';
+        document.getElementById('marca').value = vehiculo.marca || '';
+        document.getElementById('modelo').value = vehiculo.modelo || '';
+        if (inputAnio) {
+            inputAnio.value = String(vehiculo.anio || '');
+        }
+        if (yearList) {
+            Array.from(yearList.querySelectorAll('.year-option')).forEach((el) => {
+                el.classList.toggle('selected', el.dataset.year === String(vehiculo.anio));
+            });
+        }
+        if (inputKilometraje) {
+            inputKilometraje.value = vehiculo.kilometraje ?? 0;
+        }
+        if (btnGuardarVehiculo) {
+            btnGuardarVehiculo.textContent = 'Actualizar Vehículo';
+        }
+        if (btnCancelarVehiculo) {
+            btnCancelarVehiculo.classList.remove('hidden');
+        }
+        recalcularAlturaActual();
+    }
+
+    function limpiarFormularioVehiculo() {
+        if (formVehiculo) {
+            formVehiculo.reset();
+        }
+        document.getElementById('idVehiculo').value = '';
+        if (inputKilometraje) {
+            inputKilometraje.value = 0;
+        }
+        if (yearList) {
+            Array.from(yearList.querySelectorAll('.year-option')).forEach((el) => {
+                el.classList.remove('selected');
+            });
+        }
+        if (btnGuardarVehiculo) {
+            btnGuardarVehiculo.textContent = 'Guardar Vehículo';
+        }
+        if (btnCancelarVehiculo) {
+            btnCancelarVehiculo.classList.add('hidden');
+        }
+    }
+
+    function renderizarVehiculos(vehiculos) {
+        if (tablaVehiculos) {
+            tablaVehiculos.innerHTML = '';
+            vehiculos.forEach((v) => {
+                const tr = document.createElement('tr');
+
+                const tdMat = document.createElement('td');
+                tdMat.textContent = v.matricula;
+
+                const tdMarca = document.createElement('td');
+                tdMarca.textContent = v.marca;
+
+                const tdModelo = document.createElement('td');
+                tdModelo.textContent = v.modelo;
+
+                const tdAnio = document.createElement('td');
+                tdAnio.textContent = v.anio;
+
+                const tdKm = document.createElement('td');
+                tdKm.textContent = (Number(v.kilometraje) || 0).toLocaleString('es-ES') + ' km';
+
+                const tdAcciones = document.createElement('td');
+                const contenedorAcciones = document.createElement('div');
+                contenedorAcciones.className = 'actions-row';
+                contenedorAcciones.style.marginTop = '0';
+                contenedorAcciones.style.justifyContent = 'flex-start';
+
+                const btnEditar = document.createElement('button');
+                btnEditar.type = 'button';
+                btnEditar.className = 'btn btn-sm';
+                btnEditar.textContent = 'Editar';
+                btnEditar.addEventListener('click', () => {
+                    ocultarAlerta();
+                    prepararEdicionVehiculo(v);
+                });
+
+                const btnEliminar = document.createElement('button');
+                btnEliminar.type = 'button';
+                btnEliminar.className = 'btn btn-danger btn-sm';
+                btnEliminar.textContent = 'Eliminar';
+                btnEliminar.addEventListener('click', async () => {
+                    ocultarAlerta();
+                    try {
+                        const res = await peticionSW(VEHICULO_ENDPOINT, {
+                            action: 'eliminar',
+                            id_vehiculo: v.id_vehiculo
+                        });
+                        if (res && res.success) {
+                            limpiarFormularioVehiculo();
+                            await cargarVehiculos();
+                            await cargarCitasYFacturas();
+                            mostrarAlerta(res.msg || 'Vehículo eliminado.', 'success');
+                        } else {
+                            mostrarAlerta((res && res.msg) || 'No se pudo eliminar el vehículo.', 'error');
+                        }
+                    } catch (err) {
+                        mostrarAlerta('Error de conexión al eliminar el vehículo.', 'error');
+                    }
+                });
+
+                contenedorAcciones.appendChild(btnEditar);
+                contenedorAcciones.appendChild(btnEliminar);
+                tdAcciones.appendChild(contenedorAcciones);
+
+                tr.appendChild(tdMat);
+                tr.appendChild(tdMarca);
+                tr.appendChild(tdModelo);
+                tr.appendChild(tdAnio);
+                tr.appendChild(tdKm);
+                tr.appendChild(tdAcciones);
+
+                tablaVehiculos.appendChild(tr);
+            });
+        }
+
+        if (selectCitaVehiculo) {
+            const valorPrevio = selectCitaVehiculo.value;
+            selectCitaVehiculo.innerHTML = '<option value="">Seleccione un vehículo</option>';
+            vehiculos.forEach((v) => {
+                const opt = document.createElement('option');
+                opt.value = v.id_vehiculo;
+                opt.textContent = `${v.marca} ${v.modelo} (${v.matricula})`;
+                selectCitaVehiculo.appendChild(opt);
+            });
+            if (valorPrevio && vehiculos.some((v) => String(v.id_vehiculo) === String(valorPrevio))) {
+                selectCitaVehiculo.value = valorPrevio;
+            }
+        }
+
+        recalcularAlturaActual();
+    }
+
+    function renderizarCitas(citas) {
+        if (!tablaCitas) return;
+        tablaCitas.innerHTML = '';
+
+        citas.forEach((c) => {
+            const tr = document.createElement('tr');
+
+            const tdId = document.createElement('td');
+            tdId.textContent = '#' + c.id_cita;
+
+            const tdVehiculo = document.createElement('td');
+            tdVehiculo.textContent = c.marca ? `${c.marca} ${c.modelo} (${c.matricula})` : `Vehículo #${c.id_vehiculo}`;
+
+            const tdFecha = document.createElement('td');
+            tdFecha.textContent = formatearFechaHora(c.fecha_cita);
+
+            const tdMotivo = document.createElement('td');
+            tdMotivo.textContent = c.motivo || '-';
+
+            const tdEstado = document.createElement('td');
+            const badge = document.createElement('span');
+            badge.className = 'badge';
+            badge.textContent = String(c.estado || 'pendiente').replace('_', ' ').toUpperCase();
+            tdEstado.appendChild(badge);
+
+            if (c.estado === 'pendiente') {
+                const btnCancelarCita = document.createElement('button');
+                btnCancelarCita.type = 'button';
+                btnCancelarCita.className = 'btn btn-danger btn-sm';
+                btnCancelarCita.style.marginLeft = '8px';
+                btnCancelarCita.textContent = 'Cancelar';
+                btnCancelarCita.addEventListener('click', async () => {
+                    ocultarAlerta();
+                    try {
+                        const res = await peticionSW(CITA_ENDPOINT, {
+                            action: 'cancelar',
+                            id_cita: c.id_cita
+                        });
+                        if (res && res.success) {
+                            await cargarCitasYFacturas();
+                            mostrarAlerta(res.msg || 'Cita cancelada.', 'success');
+                        } else {
+                            mostrarAlerta((res && res.msg) || 'No se pudo cancelar la cita.', 'error');
+                        }
+                    } catch (err) {
+                        mostrarAlerta('Error de conexión al cancelar la cita.', 'error');
+                    }
+                });
+                tdEstado.appendChild(btnCancelarCita);
+            }
+
+            const tdHoras = document.createElement('td');
+            tdHoras.textContent = (Number(c.horas_trabajo) || 0).toFixed(2) + ' h';
+
+            const tdMateriales = document.createElement('td');
+            tdMateriales.textContent = c.materiales_usados || 'Sin materiales';
+
+            tr.appendChild(tdId);
+            tr.appendChild(tdVehiculo);
+            tr.appendChild(tdFecha);
+            tr.appendChild(tdMotivo);
+            tr.appendChild(tdEstado);
+            tr.appendChild(tdHoras);
+            tr.appendChild(tdMateriales);
+
+            tablaCitas.appendChild(tr);
+        });
+
+        recalcularAlturaActual();
+    }
+
+    function renderizarFacturas(facturas) {
+        if (!tablaFacturas) return;
+        tablaFacturas.innerHTML = '';
+
+        facturas.forEach((f) => {
+            const tr = document.createElement('tr');
+
+            const tdNum = document.createElement('td');
+            tdNum.textContent = f.numero_factura;
+
+            const tdFecha = document.createElement('td');
+            tdFecha.textContent = formatearFechaHora(f.fecha_emision);
+
+            const tdManoObra = document.createElement('td');
+            tdManoObra.textContent = formatearMoneda(f.importe_mano_obra);
+
+            const tdRepuestos = document.createElement('td');
+            tdRepuestos.textContent = formatearMoneda(f.importe_repuestos);
+
+            const tdSubtotal = document.createElement('td');
+            tdSubtotal.textContent = formatearMoneda(f.subtotal);
+
+            const tdIva = document.createElement('td');
+            tdIva.textContent = formatearMoneda(f.iva);
+
+            const tdTotal = document.createElement('td');
+            tdTotal.style.fontWeight = '700';
+            tdTotal.textContent = formatearMoneda(f.total);
+
+            const tdEstado = document.createElement('td');
+            const badge = document.createElement('span');
+            badge.className = 'badge';
+            badge.textContent = f.pagada ? 'PAGADA' : 'PENDIENTE';
+            tdEstado.appendChild(badge);
+
+            tr.appendChild(tdNum);
+            tr.appendChild(tdFecha);
+            tr.appendChild(tdManoObra);
+            tr.appendChild(tdRepuestos);
+            tr.appendChild(tdSubtotal);
+            tr.appendChild(tdIva);
+            tr.appendChild(tdTotal);
+            tr.appendChild(tdEstado);
+
+            tablaFacturas.appendChild(tr);
+        });
+
+        recalcularAlturaActual();
+    }
+
+    async function cargarVehiculos() {
+        try {
+            const res = await peticionSW(VEHICULO_ENDPOINT, { action: 'listar' });
+            if (res && res.success && Array.isArray(res.data)) {
+                renderizarVehiculos(res.data);
+            }
+        } catch (err) {
+        }
+    }
+
+    async function cargarCitasYFacturas() {
+        try {
+            const res = await peticionSW(CITA_ENDPOINT, { action: 'listar' });
+            if (res && res.success && res.data) {
+                renderizarCitas(Array.isArray(res.data.citas) ? res.data.citas : []);
+                renderizarFacturas(Array.isArray(res.data.facturas) ? res.data.facturas : []);
+            }
+        } catch (err) {
+        }
+    }
 
     function rellenarDatosUsuarioUI(usuario, cliente) {
         if (nombreUsuarioActivo) {
@@ -735,6 +1044,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             actualizarDatosSesion(res.data);
             rellenarDatosUsuarioUI(res.data.usuario, res.data.cliente);
+            await Promise.all([cargarVehiculos(), cargarCitasYFacturas()]);
         } catch (err) {
             limpiarSesion();
             window.location.href = 'index.html';
@@ -798,22 +1108,92 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     if (formVehiculo) {
-        formVehiculo.addEventListener('submit', (e) => {
+        formVehiculo.addEventListener('submit', async (e) => {
             e.preventDefault();
+            ocultarAlerta();
+
+            const idVehiculo = document.getElementById('idVehiculo').value.trim();
+            const matricula = document.getElementById('matricula').value.trim();
+            const marca = document.getElementById('marca').value.trim();
+            const modelo = document.getElementById('modelo').value.trim();
+            const anio = parseInt(document.getElementById('anio').value, 10);
+            const kilometraje = parseInt(document.getElementById('kilometraje').value, 10) || 0;
+
+            if (!anio || anio < ANIO_MINIMO || anio > ANIO_MAXIMO) {
+                mostrarAlerta(`Seleccione un año válido entre ${ANIO_MINIMO} y ${ANIO_MAXIMO}.`, 'error');
+                return;
+            }
+
+            const payload = {
+                action: idVehiculo ? 'actualizar' : 'crear',
+                id_vehiculo: idVehiculo || undefined,
+                matricula,
+                marca,
+                modelo,
+                anio,
+                kilometraje
+            };
+
+            try {
+                const res = await peticionSW(VEHICULO_ENDPOINT, payload);
+                if (res && res.success) {
+                    limpiarFormularioVehiculo();
+                    await cargarVehiculos();
+                    mostrarAlerta(res.msg || 'Vehículo guardado correctamente.', 'success');
+                } else {
+                    mostrarAlerta((res && res.msg) || 'No se pudo guardar el vehículo.', 'error');
+                }
+            } catch (err) {
+                mostrarAlerta('Error de conexión al guardar el vehículo.', 'error');
+            }
         });
     }
 
     if (btnCancelarVehiculo && formVehiculo) {
         btnCancelarVehiculo.addEventListener('click', () => {
-            formVehiculo.reset();
-            document.getElementById('idVehiculo').value = '';
-            btnCancelarVehiculo.classList.add('hidden');
+            ocultarAlerta();
+            limpiarFormularioVehiculo();
+            recalcularAlturaActual();
         });
     }
 
     if (formCita) {
-        formCita.addEventListener('submit', (e) => {
+        formCita.addEventListener('submit', async (e) => {
             e.preventDefault();
+            ocultarAlerta();
+
+            const idVehiculo = document.getElementById('citaVehiculo').value;
+            const fechaCita = document.getElementById('fechaCita').value.trim();
+            const motivo = document.getElementById('motivoCita').value.trim();
+
+            if (!idVehiculo || !fechaCita || !motivo) {
+                mostrarAlerta('Seleccione un vehículo, una fecha/hora y describa el motivo.', 'error');
+                return;
+            }
+
+            try {
+                const res = await peticionSW(CITA_ENDPOINT, {
+                    action: 'crear',
+                    id_vehiculo: idVehiculo,
+                    fecha_cita: fechaCita,
+                    motivo
+                });
+
+                if (res && res.success) {
+                    formCita.reset();
+                    fechaCitaInput.value = '';
+                    fechaCitaDisplay.value = '';
+                    fechaSeleccionada = null;
+                    renderizarCalendarioCita();
+                    await cargarCitasYFacturas();
+                    mostrarAlerta(res.msg || 'Cita solicitada correctamente.', 'success');
+                    cambiarSeccion(2, false);
+                } else {
+                    mostrarAlerta((res && res.msg) || 'No se pudo solicitar la cita.', 'error');
+                }
+            } catch (err) {
+                mostrarAlerta('Error de conexión al solicitar la cita.', 'error');
+            }
         });
     }
 

@@ -94,7 +94,7 @@ erDiagram
 | **MF-05** | Semana 2 (26 Oct-01 Nov) | Frontend (DI) | Maquetar vistas HTML5/CSS3 responsivas (`index.html`, `cliente.html`) | Completado |
 | **MF-06** | Semana 3 (02-08 Nov) | Backend (AD) | Implementar modelos POO `Cita.php` y `Factura.php` | Completado |
 | **MF-07** | Semana 3 (02-08 Nov) | Servicios Web | Desarrollar `auth_sw.php` y conectar Login/Registro con `fetch()` y `auth_key` | Completado |
-| **MF-08** | Semana 4 (09-15 Nov) | Cliente (DI/AD) | Desarrollar `cliente_sw.php`, `vehiculo_sw.php`, `cita_sw.php` y panel `cliente.js` | Pendiente |
+| **MF-08** | Semana 4 (09-15 Nov) | Cliente (DI/AD) | Desarrollar `cliente_sw.php`, `vehiculo_sw.php`, `cita_sw.php` y panel `cliente.js` | Completado |
 | **MF-09** | Semana 5 (16-22 Nov) | Taller y Facturas | Desarrollar `oficina.html`, `mecano.html`, `admin.html`, `taller.js` y `factura_sw.php` | Pendiente |
 | **MF-10** | Semana 6 (23-30 Nov) | QA y Entrega | Pruebas de integración, revisión de seguridad, memoria final y exportación de Jira | Pendiente |
 
